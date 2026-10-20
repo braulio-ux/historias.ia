@@ -1,0 +1,15 @@
+{
+  "name": "historias-ia",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Generador de historias animadas con narracion, imagenes y video, usando Netlify AI Gateway",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.136.0",
+    "@google/genai": "^2.30.0",
+    "openai": "^7.39.0"
+  }
+}

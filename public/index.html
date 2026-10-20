@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estudio de Historias IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header class="top">
+  <div class="marca">
+    <span class="logo" aria-hidden="true"></span>
+    <div>
+      <h1>Estudio de Historias</h1>
+      <p>Describe tu historia. La IA escribe, ilustra, narra y anima.</p>
+    </div>
+  </div>
+  <div class="acciones-top">
+    <button class="btn fantasma" id="btnCargar" type="button">Abrir proyecto</button>
+    <button class="btn fantasma" id="btnGuardar" type="button" disabled>Guardar proyecto</button>
+    <input type="file" id="archivoProyecto" accept="application/json" hidden>
+  </div>
+</header>
+
+<main class="grid">
+  <!-- Panel de creacion -->
+  <section class="panel" id="panelForm">
+    <h2>1. Tu historia</h2>
+    <label class="campo">
+      <span>Descripcion e historia</span>
+      <textarea id="descripcion" rows="7" placeholder="Ej.: Una nina llamada Luna encuentra un faro abandonado en la costa de Samana. Dentro vive un viejo robot que guarda la luz de las estrellas. Juntos deben encender el faro antes de la gran tormenta..."></textarea>
+    </label>
+
+    <div class="fila">
+      <label class="campo">
+        <span>Escenas: <b id="numEscenasTxt">6</b></span>
+        <input type="range" id="numEscenas" min="3" max="12" value="6">
+      </label>
+      <label class="campo">
+        <span>Formato</span>
+        <select id="aspecto">
+          <option value="16:9">Horizontal 16:9 (YouTube)</option>
+          <option value="9:16">Vertical 9:16 (Reels, TikTok)</option>
+          <option value="1:1">Cuadrado 1:1 (Feed)</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="campo">
+      <span>Estilo visual</span>
+      <select id="estilo">
+        <option value="3D animated feature film, Pixar-like, soft global illumination, expressive characters">Animacion 3D tipo cine</option>
+        <option value="hand-painted 2D animation, Studio Ghibli inspired watercolor backgrounds, gentle light">Anime acuarela 2D</option>
+        <option value="children's storybook illustration, gouache and colored pencil, warm and cozy">Libro infantil ilustrado</option>
+        <option value="cinematic photorealistic, 35mm film, dramatic lighting, shallow depth of field">Cinematografico realista</option>
+        <option value="stylized comic book art, bold ink lines, vibrant flat colors, halftone shading">Comic</option>
+        <option value="claymation stop-motion, handmade clay figures, miniature set, soft studio light">Plastilina stop-motion</option>
+        <option value="dark fantasy concept art, moody atmosphere, volumetric fog, painterly">Fantasia oscura</option>
+        <option value="custom">Personalizado...</option>
+      </select>
+    </label>
+    <label class="campo" id="campoEstiloLibre" hidden>
+      <span>Describe el estilo</span>
+      <input type="text" id="estiloLibre" placeholder="Ej.: pixel art retro 16 bits, colores neon">
+    </label>
+
+    <div class="fila">
+      <label class="campo">
+        <span>Idioma</span>
+        <select id="idioma">
+          <option value="espanol" data-lang="es">Espanol</option>
+          <option value="ingles" data-lang="en">Ingles</option>
+          <option value="portugues" data-lang="pt">Portugues</option>
+          <option value="frances" data-lang="fr">Frances</option>
+        </select>
+      </label>
+      <label class="campo">
+        <span>Voz del narrador</span>
+        <select id="voz">
+          <option value="nova">Nova (calida)</option>
+          <option value="coral">Coral (amable)</option>
+          <option value="sage">Sage (serena)</option>
+          <option value="shimmer">Shimmer (suave)</option>
+          <option value="fable">Fable (cuentacuentos)</option>
+          <option value="onyx">Onyx (grave)</option>
+          <option value="ash">Ash (firme)</option>
+          <option value="echo">Echo (neutra)</option>
+          <option value="ballad">Ballad (emotiva)</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="campo">
+      <span>Publico</span>
+      <select id="publico">
+        <option>todo publico</option>
+        <option>ninos pequenos</option>
+        <option>adolescentes</option>
+        <option>adultos</option>
+      </select>
+    </label>
+
+    <div class="checks">
+      <label><input type="checkbox" id="optMusica" checked> Musica de fondo</label>
+      <label><input type="checkbox" id="optSubs" checked> Subtitulos</label>
+      <label><input type="checkbox" id="optCoherencia" checked> Mantener personajes iguales</label>
+    </div>
+
+    <button class="btn primario grande" id="btnCrear" type="button">Crear historia animada</button>
+
+    <ol class="progreso" id="progreso" hidden>
+      <li data-paso="guion">Escribiendo el guion</li>
+      <li data-paso="imagenes">Ilustrando escenas <span class="cuenta"></span></li>
+      <li data-paso="voz">Grabando la narracion <span class="cuenta"></span></li>
+      <li data-paso="montaje">Montando la animacion</li>
+    </ol>
+    <p class="aviso" id="mensaje" role="status"></p>
+  </section>
+
+  <!-- Reproductor -->
+  <section class="panel escenario" id="panelPlayer">
+    <div class="cabeza-escenario">
+      <h2>2. Tu video</h2>
+      <span class="chip" id="chipVoz" hidden></span>
+    </div>
+    <div class="marco" id="marco">
+      <canvas id="lienzo" width="1280" height="720"></canvas>
+      <div class="vacio" id="vacio">
+        <p>Tu historia aparecera aqui.</p>
+      </div>
+    </div>
+    <div class="controles">
+      <button class="btn redondo" id="btnPlay" type="button" disabled aria-label="Reproducir">
+        <svg viewBox="0 0 24 24" class="ico-play"><path d="M8 5v14l11-7z"/></svg>
+        <svg viewBox="0 0 24 24" class="ico-pausa"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+      </button>
+      <input type="range" id="linea" min="0" max="1000" value="0" disabled>
+      <span class="tiempo" id="tiempo">0:00 / 0:00</span>
+    </div>
+    <div class="exportar">
+      <button class="btn primario" id="btnExportar" type="button" disabled>Exportar video</button>
+      <span class="nota" id="notaExport"></span>
+    </div>
+    <div class="barra" id="barraExport" hidden><div></div></div>
+  </section>
+
+  <!-- Storyboard -->
+  <section class="panel ancho" id="panelStory" hidden>
+    <div class="cabeza-escenario">
+      <div>
+        <h2 id="tituloHistoria">3. Escenas</h2>
+        <p class="sinopsis" id="sinopsis"></p>
+      </div>
+      <button class="btn fantasma" id="btnRevoz" type="button">Regrabar narracion</button>
+    </div>
+    <div class="tablero" id="tablero"></div>
+  </section>
+</main>
+
+<template id="tplEscena">
+  <article class="escena">
+    <div class="miniatura">
+      <img alt="">
+      <span class="num"></span>
+      <div class="cargando"><span></span></div>
+    </div>
+    <div class="cuerpo">
+      <textarea class="narracion" rows="4"></textarea>
+      <details>
+        <summary>Descripcion de imagen</summary>
+        <textarea class="prompt" rows="4"></textarea>
+      </details>
+      <div class="opciones">
+        <select class="camara">
+          <option value="zoom-in">Zoom adentro</option>
+          <option value="zoom-out">Zoom afuera</option>
+          <option value="pan-izquierda">Paneo izquierda</option>
+          <option value="pan-derecha">Paneo derecha</option>
+          <option value="pan-arriba">Paneo arriba</option>
+          <option value="pan-abajo">Paneo abajo</option>
+        </select>
+        <select class="efecto">
+          <option value="ninguno">Sin efecto</option>
+          <option value="particulas">Particulas</option>
+          <option value="lluvia">Lluvia</option>
+          <option value="nieve">Nieve</option>
+          <option value="luciernagas">Luciernagas</option>
+          <option value="brillo">Destello</option>
+        </select>
+      </div>
+      <div class="botones">
+        <button class="btn mini" data-acc="imagen" type="button">Nueva imagen</button>
+        <button class="btn mini" data-acc="subir" type="button">Subir imagen</button>
+        <button class="btn mini" data-acc="ver" type="button">Ver escena</button>
+        <input type="file" accept="image/*" hidden>
+      </div>
+    </div>
+  </article>
+</template>
+
+<script src="app.js"></script>
+</body>
+</html>
